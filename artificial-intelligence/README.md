@@ -17,7 +17,7 @@ This course takes you on a journey from the mathematical foundations of autonomo
 
 ## Part 1: Reinforcement Learning (Weeks 1–7)
 
-### Week 1 — Foundations of Markov Decision Processes (MDPs)
+### [Week 1 — Foundations of Markov Decision Processes (MDPs)](week_1_rl_and_mdp.md)
 **The "Grammar" of decision-making.**
 We define the RL universe: agents, environments, and rewards. You'll learn the **Bellman Equation** — the mathematical secret behind calculating the "value" of being in a specific situation.
 
