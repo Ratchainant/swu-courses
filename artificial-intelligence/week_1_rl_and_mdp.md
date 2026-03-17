@@ -202,3 +202,15 @@ $$V^*(s) = \max_a \sum_{s'} \mathcal{T}(s' \mid s, a) \left[ \mathcal{R}(s, a, s
 | **MDP** | Formalism for sequential decision-making with states, actions, transitions, rewards |
 | **Markov Property** | Future depends only on current state, not history |
 | **Policy** | A strategy mapping states to actions; goal is to find the optimal policy $\pi^*$ |
+
+---
+
+## 5. Exercise
+
+Test your understanding of the key concepts from this week with a crossword puzzle featuring 20 terms from Reinforcement Learning and Markov Decision Processes.
+
+**WARNING**
+- Your test will be ended automatically once you click on the **reveal** button
+- The test use only your 1st time taking score.  The later score of the same student will not be used.
+
+[Open Crossword Puzzle](https://claude.ai/public/artifacts/76fe6679-4aa2-441f-b591-a6d297ffeff6)
