@@ -90,7 +90,7 @@ $$Q(a) = \frac{\text{sum of rewards when } a \text{ was taken}}{\text{number of 
 
 Always pick the action with the highest estimated value:
 
-$$a^* = \arg\max_a Q(a)$$
+$$a^{*} = \arg\max_a Q(a)$$
 
 **Problem:** Never explores. Gets permanently stuck on the first good option it finds.
 
@@ -290,13 +290,13 @@ $$\pi(s) = a \quad \text{(always take action } a \text{ in state } s\text{)}$$
 
 $$\pi(a \mid s) = P(\text{take action } a \mid \text{in state } s)$$
 
-The goal of RL is to find the **optimal policy** $\pi^*$ that maximizes the expected cumulative discounted reward from any starting state:
+The goal of RL is to find the **optimal policy** $\pi^{*}$ that maximizes the expected cumulative discounted reward from any starting state:
 
-$$\pi^* = \arg\max_\pi \mathbb{E}_\pi \left[ \sum_{t=0}^{\infty} \gamma^t r_{t+1} \right]$$
+$$\pi^{*} = \arg\max_\pi \mathbb{E}_\pi \left[ \sum_{t=0}^{\infty} \gamma^t r_{t+1} \right]$$
 
 | Notation | Meaning |
 |----------|---------|
-| $\pi^*$ | The **optimal policy** — the best possible strategy for choosing actions |
+| $\pi^{*}$ | The **optimal policy** — the best possible strategy for choosing actions |
 | $\arg\max_\pi$ | "Find the policy $\pi$ that produces the highest value" — $\arg\max$ returns the *argument* (here, the policy itself) that maximises the expression, not just the maximum value |
 | $\mathbb{E}_\pi[\cdots]$ | **Expected value** when the agent follows policy $\pi$ — because transitions can be stochastic, we average over all possible trajectories the agent might experience |
 | $\sum_{t=0}^{\infty}$ | Sum over all future time steps, from now ($t=0$) to infinity — captures the full lifetime of the agent |
@@ -317,7 +317,7 @@ $$V^\pi(s) = \mathbb{E}_\pi \left[ G_t \mid s_t = s \right]$$
 
 The optimal value function satisfies the **Bellman Optimality Equation**:
 
-$$V^*(s) = \max_a \sum_{s'} \mathcal{T}(s' \mid s, a) \left[ \mathcal{R}(s, a, s') + \gamma V^*(s') \right]$$
+$$V^{*}(s) = \max_a \sum_{s'} \mathcal{T}(s' \mid s, a) \left[ \mathcal{R}(s, a, s') + \gamma V^{*}(s') \right]$$
 
 **In plain language:**
 
@@ -330,7 +330,7 @@ Breaking it down piece by piece:
 | $\max_a$ | *"Which action should I take?"* — try every possible action and pick the best one |
 | $\sum_{s'} \mathcal{T}(s' \mid s, a)[\cdots]$ | *"The world is uncertain"* — I might land in different next states; average the outcome across all of them, weighted by their probability |
 | $\mathcal{R}(s, a, s')$ | *"What do I earn right now?"* — the immediate reward from this transition |
-| $\gamma V^*(s')$ | *"What is the future worth from where I land?"* — the discounted value of the next state, assuming I keep acting optimally from there |
+| $\gamma V^{*}(s')$ | *"What is the future worth from where I land?"* — the discounted value of the next state, assuming I keep acting optimally from there |
 
 **The key insight — recursive self-consistency:**
 
@@ -366,6 +366,24 @@ $$V(S) = -1 + 0.9 \times \underbrace{V(H)}_{8.88} = -1 + 7.99 = \mathbf{6.99}$$
 
 ---
 
+**Convergence criterion:**
+
+We stop iterating when the largest change across all states in a single iteration falls below a small threshold $\theta$ (called the **tolerance**):
+
+$$\max_s \left| V_{\text{new}}(s) - V_{\text{old}}(s) \right| < \theta$$
+
+In practice, $\theta = 0.01$ or $\theta = 0.001$ is common. Applying it to this example:
+
+| Iteration | $\Delta V(S)$ | $\Delta V(H)$ | $\max \Delta$ | Stop? |
+|-----------|--------------|--------------|---------------|-------|
+| 1 | $|6.02 - 0| = 6.02$ | $|7.80 - 0| = 7.80$ | 7.80 | No |
+| 2 | $|6.99 - 6.02| = 0.97$ | $|8.88 - 7.80| = 1.08$ | 1.08 | No |
+| 3 | $|7.15 - 6.99| = 0.16$ | $|9.06 - 8.88| = 0.18$ | 0.18 | No |
+| 4 | $|7.18 - 7.15| = 0.03$ | $|9.09 - 9.06| = 0.03$ | 0.03 | No ($\theta=0.01$) |
+| 5 | $\approx 0.005$ | $\approx 0.005$ | $\approx 0.005$ | **Yes** ✓ |
+
+**Intuition:** Think of it like a GPS recalculating a route. After each pass, the estimated times change less and less. Once the update is smaller than "1 second difference" (your $\theta$), the GPS considers the route settled and stops recalculating.
+
 **Summary of convergence:**
 
 | Iteration | $V(S)$ | $V(H)$ | $V(G)$ |
@@ -377,8 +395,8 @@ $$V(S) = -1 + 0.9 \times \underbrace{V(H)}_{8.88} = -1 + 7.99 = \mathbf{6.99}$$
 | Converged | **7.18** | **9.09** | **0.00** |
 
 **Interpretation:**
-- $V^*(H) \approx 9.09$ — a robot already in the Hallway can expect ~9.09 total discounted reward by acting optimally.
-- $V^*(S) \approx 7.18$ — a robot at Start gets slightly less because it pays a −1 step cost before reaching the Hallway.
+- $V^{*}(H) \approx 9.09$ — a robot already in the Hallway can expect ~9.09 total discounted reward by acting optimally.
+- $V^{*}(S) \approx 7.18$ — a robot at Start gets slightly less because it pays a −1 step cost before reaching the Hallway.
 - The difference $9.09 - 7.18 = 1.91$ reflects exactly the expected cost of the Start → Hallway transition (step cost of −1, discounted one step: $1 \times 0.9 \approx 0.9$, plus the 20% slip risk in the Hallway compounding over time).
 
 ### Real-World Applications of MDPs
@@ -410,7 +428,7 @@ $$V(S) = -1 + 0.9 \times \underbrace{V(H)}_{8.88} = -1 + 7.99 = \mathbf{6.99}$$
 | **UCB** | Explore intelligently by targeting high uncertainty actions |
 | **MDP** | Formalism for sequential decision-making with states, actions, transitions, rewards |
 | **Markov Property** | Future depends only on current state, not history |
-| **Policy** | A strategy mapping states to actions; goal is to find the optimal policy $\pi^*$ |
+| **Policy** | A strategy mapping states to actions; goal is to find the optimal policy $\pi^{*}$ |
 
 ---
 
