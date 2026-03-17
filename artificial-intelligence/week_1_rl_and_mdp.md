@@ -283,9 +283,11 @@ $G$ is the **terminal state** — the episode ends once the robot arrives.
 A **policy** $\pi$ defines the agent's behavior — a mapping from states to actions.
 
 **Deterministic policy:**
+
 $$\pi(s) = a \quad \text{(always take action } a \text{ in state } s\text{)}$$
 
 **Stochastic policy:**
+
 $$\pi(a \mid s) = P(\text{take action } a \mid \text{in state } s)$$
 
 The goal of RL is to find the **optimal policy** $\pi^*$ that maximizes the expected cumulative discounted reward from any starting state:
@@ -302,6 +304,7 @@ $$\pi^* = \arg\max_\pi \mathbb{E}_\pi \left[ \sum_{t=0}^{\infty} \gamma^t r_{t+1
 | $r_{t+1}$ | The **reward received at time step $t+1$** — it is $t+1$ (not $t$) because the reward is received *after* the agent takes action $a_t$ at time $t$ |
 
 **Value function** — the expected return from state $s$ following policy $\pi$:
+
 $$V^\pi(s) = \mathbb{E}_\pi \left[ G_t \mid s_t = s \right]$$
 
 | Notation | Meaning |
@@ -313,6 +316,7 @@ $$V^\pi(s) = \mathbb{E}_\pi \left[ G_t \mid s_t = s \right]$$
 | $s_t = s$ | The condition: *"the agent is in state $s$ at time $t$"* — we are asking for the expected return specifically from this starting state |
 
 The optimal value function satisfies the **Bellman Optimality Equation**:
+
 $$V^*(s) = \max_a \sum_{s'} \mathcal{T}(s' \mid s, a) \left[ \mathcal{R}(s, a, s') + \gamma V^*(s') \right]$$
 
 **In plain language:**
@@ -346,8 +350,8 @@ Using the Robot Navigation MDP ($\gamma = 0.9$). We solve the Bellman equation r
 
 $V(G) = 0$ (terminal state)
 
-$$V(H) = \underbrace{0.8}_{\text{reach Goal}} \bigl[\underbrace{+10}_{\mathcal{R}} + 0.9 \times \underbrace{V(G)}_{0}\bigr] + \underbrace{0.2}_{\text{slip back}} \bigl[\underbrace{-1}_{\mathcal{R}} + 0.9 \times \underbrace{V(S)}_{0}\bigr]$$
-$$= 0.8(10) + 0.2(-1) = 8.0 - 0.2 = \mathbf{7.8}$$
+$$V(H) = \underbrace{0.8}_{\text{reach Goal}} \bigl[\underbrace{+10}_{\mathcal{R}} + 0.9 \times \underbrace{V(G)}_{0}\bigr] + \underbrace{0.2}_{\text{slip back}} \bigl[\underbrace{-1}_{\mathcal{R}} + 0.9 \times \underbrace{V(S)}_{0}\bigr] \\
+= 0.8(10) + 0.2(-1) = 8.0 - 0.2 = \mathbf{7.8}$$
 
 $$V(S) = 1.0 \times \bigl[-1 + 0.9 \times \underbrace{V(H)}_{7.8}\bigr] = -1 + 7.02 = \mathbf{6.02}$$
 
@@ -355,8 +359,8 @@ $$V(S) = 1.0 \times \bigl[-1 + 0.9 \times \underbrace{V(H)}_{7.8}\bigr] = -1 + 7
 
 **Iteration 2** — Use the updated values:
 
-$$V(H) = 0.8(10 + 0) + 0.2\bigl(-1 + 0.9 \times \underbrace{V(S)}_{6.02}\bigr)$$
-$$= 8.0 + 0.2(-1 + 5.42) = 8.0 + 0.2(4.42) = 8.0 + 0.88 = \mathbf{8.88}$$
+$$V(H) = 0.8(10 + 0) + 0.2\bigl(-1 + 0.9 \times \underbrace{V(S)}_{6.02}\bigr) \\
+= 8.0 + 0.2(-1 + 5.42) = 8.0 + 0.2(4.42) = 8.0 + 0.88 = \mathbf{8.88}$$
 
 $$V(S) = -1 + 0.9 \times \underbrace{V(H)}_{8.88} = -1 + 7.99 = \mathbf{6.99}$$
 
