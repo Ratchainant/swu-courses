@@ -52,7 +52,9 @@ Formally, the agent wants to maximize the **expected return**:
 
 $$G_t = r_{t+1} + \gamma r_{t+2} + \gamma^2 r_{t+3} + \cdots = \sum_{k=0}^{\infty} \gamma^k r_{t+k+1}$$
 
-Where $\gamma \in [0, 1]$ is the **discount factor** that controls how much the agent cares about future rewards versus immediate ones.
+Where:
+- $r_{t+k+1}$ is the **reward received at time step $t+k+1$** — a numerical signal from the environment telling the agent how good or bad the outcome of its action was at that moment
+- $\gamma \in [0, 1]$ is the **discount factor** that controls how much the agent cares about future rewards versus immediate ones
 
 ---
 
@@ -92,6 +94,20 @@ $$a^* = \arg\max_a Q(a)$$
 
 **Problem:** Never explores. Gets permanently stuck on the first good option it finds.
 
+#### Worked Calculation: Greedy Q-Value Updates
+
+You have **3 slot machines** (Arm A, B, C) with unknown true reward means. Start with $Q(a) = 0$ for all arms.
+
+| Round | Arm Tried | Reward | Update: $Q(a) = \frac{\sum \text{rewards}}{N(a)}$ | Q(A) | Q(B) | Q(C) | Next Greedy Pick |
+|-------|-----------|--------|----------------------------------------------------|------|------|------|-----------------|
+| 1 | A *(random tie)* | 2 | $Q(A) = 2/1 = 2.0$ | 2.0 | 0.0 | 0.0 | **A** |
+| 2 | A | 1 | $Q(A) = (2+1)/2 = 1.5$ | 1.5 | 0.0 | 0.0 | **A** |
+| 3 | A | 3 | $Q(A) = (2+1+3)/3 = 2.0$ | 2.0 | 0.0 | 0.0 | **A** |
+| 4 | A | 0 | $Q(A) = (2+1+3+0)/4 = 1.5$ | 1.5 | 0.0 | 0.0 | **A** |
+| 5 | A | 2 | $Q(A) = (2+1+3+0+2)/5 = 1.6$ | 1.6 | 0.0 | 0.0 | **A** |
+
+**Result:** Greedy is permanently locked on Arm A (~1.6 average). It never discovers that Arm B's true mean is 5.0 *(known only to us as the observer — the agent never has access to this)* — a far better option that was never tried.
+
 ---
 
 #### Epsilon-Greedy Algorithm ($\varepsilon$-greedy)
@@ -104,6 +120,43 @@ $$a_t = \begin{cases} \text{random action} & \text{with probability } \varepsilo
 - Large $\varepsilon$ → more exploration, slower convergence
 
 **Intuition:** Every 1 in 10 meals, force yourself to try a new restaurant. The rest of the time, enjoy your current favorite.
+
+#### Worked Calculation: ε-Greedy in Action
+
+Continuing from round 6 with $\varepsilon = 0.2$ and current estimates: $Q(A)=1.6,\ Q(B)=0.0,\ Q(C)=0.0$.
+
+**Step 1 — Roll a random number** $u \sim \text{Uniform}(0, 1)$:
+
+| Random Roll $u$ | Condition | Decision | Action Taken |
+|-----------------|-----------|----------|--------------|
+| $u = 0.05$ | $0.05 < \varepsilon\ (0.2)$ | **Explore** | Random pick → Arm B |
+| $u = 0.72$ | $0.72 \geq \varepsilon\ (0.2)$ | **Exploit** | $\arg\max Q(a)$ → Arm A |
+
+**Step 2 — Suppose $u = 0.05$ → Explore → choose Arm B → observe reward 6:**
+
+$$Q(B)_{\text{new}} = \frac{\text{total reward}}{N(B)} = \frac{0 + 6}{1} = 6.0$$
+
+**Step 3 — Updated estimates flip the greedy choice:**
+
+| Arm | Q Value | Greedy? |
+|-----|---------|---------|
+| A | 1.6 | |
+| B | **6.0** | ✓ New best! |
+| C | 0.0 | |
+
+One random exploration unlocked the superior arm — something pure greedy could never achieve.
+
+**Real-World Connection — Website A/B Testing:**
+
+A product team wants to find the highest-converting button for their signup page:
+
+| Arm | Button Text | Trials | Avg. Conversion |
+|-----|-------------|--------|----------------|
+| A | "Sign Up Now" | 200 | 3.2% |
+| B | "Get Started Free" | 50 | 4.8% ← current best |
+| C | "Try It Today" | 50 | 2.9% |
+
+With $\varepsilon = 0.1$: send **90% of traffic** to Arm B while sending **10% randomly** to keep learning. This earns revenue now while still searching for something better — a business-safe RL strategy you can deploy in production today.
 
 ---
 
@@ -122,6 +175,31 @@ Where:
 **Intuition:** When $N(a)$ is small (rarely tried), the bonus term is large → UCB is curious about untested options. As $N(a)$ grows, the bonus shrinks → UCB trusts its estimates more.
 
 **Advantage over $\varepsilon$-greedy:** UCB explores *intelligently* — it targets uncertainty rather than exploring blindly at random.
+
+#### Worked Calculation: UCB Scores
+
+At step $t = 12$ with $c = 2$, you are choosing between 3 food delivery apps. Total trials: $N(A)+N(B)+N(C) = 8+3+1 = 12$.
+
+| Arm | $Q(a)$ (avg rating) | $N(a)$ (orders) | Bonus: $c\sqrt{\dfrac{\ln t}{N(a)}}$ | **UCB Score** |
+|-----|---------------------|-----------------|--------------------------------------|---------------|
+| A | 4.5 | 8 | $2\sqrt{\frac{\ln 12}{8}} = 2\sqrt{\frac{2.485}{8}} = 2(0.557) = 1.11$ | **5.61** |
+| B | 5.2 | 3 | $2\sqrt{\frac{\ln 12}{3}} = 2\sqrt{\frac{2.485}{3}} = 2(0.910) = 1.82$ | **7.02** ✓ |
+| C | 3.8 | 1 | $2\sqrt{\frac{\ln 12}{1}} = 2\sqrt{2.485} = 2(1.577) = 3.15$ | **6.95** |
+
+*($\ln 12 \approx 2.485$)*
+
+**UCB selects App B.** Although App C has the largest uncertainty bonus, App B wins because it combines a solid average (5.2) with meaningful unexplored potential. Pure ε-greedy might have wasted this turn on App C instead.
+
+### Real-World Applications of Bandit Algorithms
+
+| Application | Arms | Reward Signal | Why Bandit? |
+|-------------|------|---------------|-------------|
+| **Website A/B Testing** | Button text / layouts | Click-through or conversion rate | Reallocate traffic to the winner while still testing |
+| **Adaptive Clinical Trials** | Drug dosages / formulations | Patient recovery rate | Minimize patient exposure to inferior treatments |
+| **Content Recommendation** | Movies, articles, ads | Watch / click / purchase rate | Personalize in real time without complete data up front |
+| **Search Result Ranking** | Ordering of results | User click / dwell time | Continuously improve ranking from live feedback |
+
+**Key insight:** Whenever you face **repeated decisions with uncertain outcomes** and you want to learn from feedback while still performing well, a bandit algorithm applies — no state, no planning required.
 
 ---
 
@@ -152,8 +230,8 @@ $$P(s_{t+1} \mid s_t, a_t, s_{t-1}, a_{t-1}, \ldots) = P(s_{t+1} \mid s_t, a_t)$
 
 An MDP is defined by the tuple $(\mathcal{S}, \mathcal{A}, \mathcal{T}, \mathcal{R}, \gamma)$:
 
-| Component | Symbol | Description |
-|-----------|--------|-------------|
+| Component | Symbol&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description |
+|-----------|--------------------------------|-------------|
 | **State space** | $\mathcal{S}$ | The set of all possible situations the agent can be in |
 | **Action space** | $\mathcal{A}$ | The set of all possible actions the agent can take |
 | **Transition dynamics** | $\mathcal{T}(s' \mid s, a)$ | Probability of reaching state $s'$ after taking action $a$ in state $s$ |
@@ -162,8 +240,43 @@ An MDP is defined by the tuple $(\mathcal{S}, \mathcal{A}, \mathcal{T}, \mathcal
 
 **Discount factor intuition:**
 - $\gamma = 0$: Agent is completely short-sighted — only cares about immediate reward
-- $\gamma = 1$: Agent values all future rewards equally (only valid for finite-horizon problems)
-- $\gamma = 0.9$: A reward 10 steps away is worth $0.9^{10} \approx 35\%$ of an immediate reward
+- $\gamma = 1$: Agent values all future rewards equally (only valid for **finite-horizon problems** — tasks that have a guaranteed end point, such as one game of chess, one episode of a robot reaching a goal, or one patient treatment cycle; because the episode always terminates in a finite number of steps, the total sum $\sum r_t$ stays bounded even without discounting; in contrast, **infinite-horizon problems** — like a server that runs forever — require $\gamma < 1$ to prevent the sum from diverging to infinity)
+- $\gamma = 0.9$: A reward received 10 steps in the future is counted as only $0.9^{10} \approx 35\%$ of its face value — so a future reward of $+100$ contributes only $\approx 35$ to the return $G_t$, whereas the same $+100$ received right now contributes the full $100$
+
+### Running Example: Robot Navigation MDP
+
+To make the formalism concrete, here is a small but complete MDP we will use throughout the rest of this section.
+
+**Scenario:** A robot moves through a 3-room building to reach the Goal room. The Hallway floor is slippery — the robot occasionally slides back to Start.
+
+```
+┌─────────┐    Move →    ┌──────────┐  ─── Move (p=0.8) ──▶  ┌──────┐
+│  Start  │ ──────────▶  │ Hallway  │                         │ Goal │
+│   (S)   │              │   (H)    │  ◀── Slip  (p=0.2) ───  │ (G)  │
+└─────────┘              └──────────┘                         └──────┘
+```
+
+**MDP Components:**
+
+| Component | Symbol | Value |
+|-----------|--------|-------|
+| State space | $\mathcal{S}$ | $\{S,\ H,\ G\}$ |
+| Action space | $\mathcal{A}$ | $\{\text{Move}\}$ |
+| Transition | $\mathcal{T}(H \mid S, \text{Move})$ | $1.0$ — always reaches Hallway |
+| Transition | $\mathcal{T}(G \mid H, \text{Move})$ | $0.8$ — reaches Goal 80% of the time |
+| Transition | $\mathcal{T}(S \mid H, \text{Move})$ | $0.2$ — slips back to Start 20% of the time |
+| Reward | $\mathcal{R}(S, \text{Move}, H)$ | $-1$ (step cost) |
+| Reward | $\mathcal{R}(H, \text{Move}, G)$ | $+10$ (goal reached!) |
+| Reward | $\mathcal{R}(H, \text{Move}, S)$ | $-1$ (slip cost) |
+| Discount | $\gamma$ | $0.9$ |
+
+> **Reading the reward notation** — $\mathcal{R}(\textit{current state},\ \textit{action},\ \textit{next state})$ is the reward signal the environment emits after one transition. For example, $\mathcal{R}(S, \text{Move}, H)$ means *"the agent was in Start, chose Move, and arrived in Hallway."*
+>
+> **Why is the step cost −1?** Without any cost per step, the agent has no incentive to reach the goal quickly — it could take 1 000 unnecessary detours and still expect the same final reward. Charging −1 for every action makes *shorter paths more valuable*, so the agent is naturally driven to reach the goal as fast as possible. Think of it as a small time-tax: every second the robot is still wandering costs it one point.
+>
+> **Why is the goal reward +10?** The value 10 is a deliberate design choice to make the goal *clearly worth pursuing* despite the step costs. The key is the **ratio** between the goal reward and the step cost: with +10 and a −1 per step, the agent breaks even at 10 steps — reaching the goal in fewer steps is profitable, in more steps is a loss. If the goal reward were only +2, a 3-step journey would already be a net loss (2 − 3 = −1), and the agent might learn to avoid the goal entirely. In general, set the goal reward large enough that the optimal path yields a comfortable positive return, but not so large that the step costs become negligible and the agent stops caring about efficiency.
+
+$G$ is the **terminal state** — the episode ends once the robot arrives.
 
 ### Policy
 
@@ -179,11 +292,103 @@ The goal of RL is to find the **optimal policy** $\pi^*$ that maximizes the expe
 
 $$\pi^* = \arg\max_\pi \mathbb{E}_\pi \left[ \sum_{t=0}^{\infty} \gamma^t r_{t+1} \right]$$
 
+| Notation | Meaning |
+|----------|---------|
+| $\pi^*$ | The **optimal policy** — the best possible strategy for choosing actions |
+| $\arg\max_\pi$ | "Find the policy $\pi$ that produces the highest value" — $\arg\max$ returns the *argument* (here, the policy itself) that maximises the expression, not just the maximum value |
+| $\mathbb{E}_\pi[\cdots]$ | **Expected value** when the agent follows policy $\pi$ — because transitions can be stochastic, we average over all possible trajectories the agent might experience |
+| $\sum_{t=0}^{\infty}$ | Sum over all future time steps, from now ($t=0$) to infinity — captures the full lifetime of the agent |
+| $\gamma^t$ | The **discount factor** raised to the power $t$ — rewards $t$ steps in the future are multiplied by $\gamma^t$, making them worth less the further away they are |
+| $r_{t+1}$ | The **reward received at time step $t+1$** — it is $t+1$ (not $t$) because the reward is received *after* the agent takes action $a_t$ at time $t$ |
+
 **Value function** — the expected return from state $s$ following policy $\pi$:
 $$V^\pi(s) = \mathbb{E}_\pi \left[ G_t \mid s_t = s \right]$$
 
+| Notation | Meaning |
+|----------|---------|
+| $V^\pi(s)$ | The **value of state $s$ under policy $\pi$** — a single number answering *"how much total discounted reward can I expect from here if I follow policy $\pi$?"* |
+| $\mathbb{E}_\pi[\cdots]$ | **Expected value** under policy $\pi$ — averages the return over all possible future trajectories, since transitions may be stochastic |
+| $G_t$ | The **return at time $t$** — the discounted sum of all future rewards from step $t$ onward: $G_t = \sum_{k=0}^{\infty} \gamma^k r_{t+k+1}$ |
+| $\mid$ | **"given that"** — a conditional; everything after $\mid$ is the condition we fix |
+| $s_t = s$ | The condition: *"the agent is in state $s$ at time $t$"* — we are asking for the expected return specifically from this starting state |
+
 The optimal value function satisfies the **Bellman Optimality Equation**:
 $$V^*(s) = \max_a \sum_{s'} \mathcal{T}(s' \mid s, a) \left[ \mathcal{R}(s, a, s') + \gamma V^*(s') \right]$$
+
+**In plain language:**
+
+> *"The best value I can get from my current state equals: pick the action that gives me the highest expected score, where that score is the immediate reward I receive right now, plus a discounted estimate of how good the state I land in will be."*
+
+Breaking it down piece by piece:
+
+| Part of the equation | What it asks |
+|----------------------|-------------|
+| $\max_a$ | *"Which action should I take?"* — try every possible action and pick the best one |
+| $\sum_{s'} \mathcal{T}(s' \mid s, a)[\cdots]$ | *"The world is uncertain"* — I might land in different next states; average the outcome across all of them, weighted by their probability |
+| $\mathcal{R}(s, a, s')$ | *"What do I earn right now?"* — the immediate reward from this transition |
+| $\gamma V^*(s')$ | *"What is the future worth from where I land?"* — the discounted value of the next state, assuming I keep acting optimally from there |
+
+**The key insight — recursive self-consistency:**
+
+The equation says that the value of the *current* state is defined in terms of the value of the *next* state — which is defined in terms of the state after that, and so on. This is the core idea of **dynamic programming**: a big problem (what is the best long-run outcome from state $s$?) is broken into a smaller one (what is the best immediate action, and then what is the best outcome from the resulting state?).
+
+Think of it like planning a road trip. The best route from your *current city* is: choose the best next city to drive to today, collect whatever you see along the way, and then assume you'll also drive optimally for the rest of the journey from there.
+
+#### Worked Calculation: Value Iteration on the Robot Navigation MDP
+
+Using the Robot Navigation MDP ($\gamma = 0.9$). We solve the Bellman equation repeatedly — updating all states each iteration — until values stop changing.
+
+**Initialize:** $V(S) = V(H) = V(G) = 0$
+
+---
+
+**Iteration 1** — Plug current values into the Bellman equation:
+
+$V(G) = 0$ (terminal state)
+
+$$V(H) = \underbrace{0.8}_{\text{reach Goal}} \bigl[\underbrace{+10}_{\mathcal{R}} + 0.9 \times \underbrace{V(G)}_{0}\bigr] + \underbrace{0.2}_{\text{slip back}} \bigl[\underbrace{-1}_{\mathcal{R}} + 0.9 \times \underbrace{V(S)}_{0}\bigr]$$
+$$= 0.8(10) + 0.2(-1) = 8.0 - 0.2 = \mathbf{7.8}$$
+
+$$V(S) = 1.0 \times \bigl[-1 + 0.9 \times \underbrace{V(H)}_{7.8}\bigr] = -1 + 7.02 = \mathbf{6.02}$$
+
+---
+
+**Iteration 2** — Use the updated values:
+
+$$V(H) = 0.8(10 + 0) + 0.2\bigl(-1 + 0.9 \times \underbrace{V(S)}_{6.02}\bigr)$$
+$$= 8.0 + 0.2(-1 + 5.42) = 8.0 + 0.2(4.42) = 8.0 + 0.88 = \mathbf{8.88}$$
+
+$$V(S) = -1 + 0.9 \times \underbrace{V(H)}_{8.88} = -1 + 7.99 = \mathbf{6.99}$$
+
+---
+
+**Summary of convergence:**
+
+| Iteration | $V(S)$ | $V(H)$ | $V(G)$ |
+|-----------|--------|--------|--------|
+| 0 (init) | 0.00 | 0.00 | 0.00 |
+| 1 | 6.02 | 7.80 | 0.00 |
+| 2 | 6.99 | 8.88 | 0.00 |
+| 3 | 7.15 | 9.06 | 0.00 |
+| Converged | **7.18** | **9.09** | **0.00** |
+
+**Interpretation:**
+- $V^*(H) \approx 9.09$ — a robot already in the Hallway can expect ~9.09 total discounted reward by acting optimally.
+- $V^*(S) \approx 7.18$ — a robot at Start gets slightly less because it pays a −1 step cost before reaching the Hallway.
+- The difference $9.09 - 7.18 = 1.91$ reflects exactly the expected cost of the Start → Hallway transition (step cost of −1, discounted one step: $1 \times 0.9 \approx 0.9$, plus the 20% slip risk in the Hallway compounding over time).
+
+### Real-World Applications of MDPs
+
+| Domain | States | Actions | Reward Signal |
+|--------|--------|---------|---------------|
+| **Robot Navigation** | Map position (x, y, heading) | Move, turn, stop | −1/step, +100 at goal, −50 collision |
+| **Inventory Management** | Current stock level | Order quantity | −holding cost, −stockout penalty |
+| **Traffic Signal Control** | Vehicle queue lengths per lane | Green/red duration | −average vehicle wait time |
+| **Game Playing (Chess / Go)** | Board position | Legal moves | +1 win, −1 loss, 0 draw |
+| **Medical Treatment Planning** | Patient health indicators | Treatment decisions | Long-term patient outcome score |
+| **Autonomous Driving** | Vehicle position, speed, surroundings | Steer, accelerate, brake | +progress, −collision, −violations |
+
+**Key insight:** Any sequential decision problem where today's action affects tomorrow's situation — and you want to optimize long-term outcomes — can be modeled as an MDP. The Bellman equation is the mathematical backbone for computing the optimal strategy in all of these domains.
 
 ---
 
