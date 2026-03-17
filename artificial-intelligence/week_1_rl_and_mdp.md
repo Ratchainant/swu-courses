@@ -186,7 +186,7 @@ At step $t = 12$ with $c = 2$, you are choosing between 3 food delivery apps. To
 | B | 5.2 | 3 | $2\sqrt{\frac{\ln 12}{3}} = 2\sqrt{\frac{2.485}{3}} = 2(0.910) = 1.82$ | **7.02** ✓ |
 | C | 3.8 | 1 | $2\sqrt{\frac{\ln 12}{1}} = 2\sqrt{2.485} = 2(1.577) = 3.15$ | **6.95** |
 
-*($\ln 12 \approx 2.485$)*
+*Note:* $\ln 12 \approx 2.485$
 
 **UCB selects App B.** Although App C has the largest uncertainty bonus, App B wins because it combines a solid average (5.2) with meaningful unexplored potential. Pure ε-greedy might have wasted this turn on App C instead.
 
