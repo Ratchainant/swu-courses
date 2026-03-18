@@ -46,7 +46,7 @@ The interaction loop:
 
 ### The Goal of Reinforcement Learning
 
-The agent's goal is to learn a **policy** (a strategy for choosing actions) that **maximizes the total cumulative reward over time** — not just the immediate reward.
+The agent's goal is to learn a **policy** (a strategy for choosing actions) that **maximizes the total cumulative reward over time** — $(G_t)$ not just the immediate reward.
 
 Formally, the agent wants to maximize the **expected return**:
 
@@ -84,7 +84,7 @@ The dilemma: you must **balance** both to maximize long-term reward. Pure exploi
 
 #### Greedy Algorithm
 
-Estimate the value of each action $a$ as the average of observed rewards:
+Let $Q(a)$ be the estimate value of each action $a$ as the average of observed rewards:
 
 $$Q(a) = \frac{\text{sum of rewards when } a \text{ was taken}}{\text{number of times } a \text{ was taken}}$$
 
