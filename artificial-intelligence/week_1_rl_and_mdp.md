@@ -224,6 +224,29 @@ An MDP assumes the **Markov Property**: the future depends only on the **current
 
 $$P(s_{t+1} \mid s_t, a_t, s_{t-1}, a_{t-1}, \ldots) = P(s_{t+1} \mid s_t, a_t)$$
 
+#### Notation Breakdown
+
+**Left-hand side** — probability conditioned on the full history:
+
+| Notation | Meaning |
+|----------|---------|
+| $P(\cdot)$ | **Probability** — a value between 0 and 1 |
+| $s_{t+1}$ | The **next state** — the situation the agent will be in after the current time step |
+| $\mid$ | "**given**" — conditional probability; everything to the right is assumed known |
+| $s_t$ | The **current state** at time $t$ |
+| $a_t$ | The **current action** taken at time $t$ |
+| $s_{t-1}$ | The **previous state** at time $t-1$ |
+| $a_{t-1}$ | The **previous action** taken at time $t-1$ |
+| $\ldots$ | All **earlier states and actions** going back to the beginning of the episode |
+
+**Right-hand side** — probability conditioned only on the present:
+
+| Notation | Meaning |
+|----------|---------|
+| $P(s_{t+1} \mid s_t, a_t)$ | Probability of reaching $s_{t+1}$ given **only** the current state $s_t$ and current action $a_t$ |
+
+The equation asserts both sides are **equal**: knowing the full history gives no extra predictive power beyond knowing the current state and action. The subscript $t$ is a discrete time index, and the sequence runs $\ldots, s_{t-1}, a_{t-1}, s_t, a_t, s_{t+1}, \ldots$
+
 **Intuition:** To decide your next move in chess, you only need to look at the current board — not the entire history of how you got there. The present state captures all relevant information.
 
 ### Formalization
