@@ -18,11 +18,11 @@ Each part is a standalone document. Start from Part 1 if you are new to Git, or 
 
 | Part | File | What you will learn |
 |------|------|---------------------|
-| 1 | [part_1_concepts.md](part_1_concepts.md) | Key Git terminology and mental models |
-| 2 | [part_2_setup.md](part_2_setup.md) | Installing Git and connecting to GitHub |
-| 3 | [part_3_solo_workflow.md](part_3_solo_workflow.md) | The everyday commands for saving and syncing your work |
-| 4 | [part_4_common_situations.md](part_4_common_situations.md) | Handling real-world problems: multiple machines, merge conflicts, and .gitignore |
-| 5 | [part_5_collaboration.md](part_5_collaboration.md) | Working with others using branches and pull requests |
+| 1 | [Part 1: Concepts](part_1_concepts.md) | Key Git terminology and mental models |
+| 2 | [Part 2: Setup](part_2_setup.md) | Installing Git and connecting to GitHub |
+| 3 | [Part 3: Solo Workflow](part_3_solo_workflow.md) | The everyday commands for saving and syncing your work |
+| 4 | [Part 4: Common Situation](part_4_common_situations.md) | Handling real-world problems: multiple machines, merge conflicts, and .gitignore |
+| 5 | [Part 5: Collaboration](part_5_collaboration.md) | Working with others using branches and pull requests |
 
 ---
 
