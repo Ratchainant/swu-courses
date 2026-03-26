@@ -21,7 +21,7 @@ This course takes you on a journey from the mathematical foundations of autonomo
 **The "Grammar" of decision-making.**
 We define the RL universe: agents, environments, and rewards. You'll learn the **Bellman Equation** — the mathematical secret behind calculating the "value" of being in a specific situation.
 
-### Week 2 — Tabular RL & Dynamic Programming
+### [Week 2 — Tabular RL & Dynamic Programming](week_2_tabular_rl_and_dynamic_programming.md)
 **Solving the world when you know the rules.**
 We explore "perfect world" scenarios. You will learn how to compute the best possible path for an agent when the rules of the environment are fully known using algorithms like **Value Iteration**.
 
