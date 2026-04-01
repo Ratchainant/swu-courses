@@ -25,23 +25,23 @@ We define the RL universe: agents, environments, and rewards. You'll learn the *
 **Solving the world when you know the rules.**
 We explore "perfect world" scenarios. You will learn how to compute the best possible path for an agent when the rules of the environment are fully known using algorithms like **Value Iteration**.
 
-### Week 3 — Model-Free Prediction & Control
+### [Week 3 — Model-Free Prediction & Control](week3_model_free_prediction_and_control.md)
 **Learning from trial and error.**
 Most real-world AI doesn't know the rules beforehand. We cover **Monte Carlo** and **Temporal-Difference (TD) learning** — methods that allow an agent to learn simply by "experiencing" the environment and updating its beliefs.
 
-### Week 4 — Temporal-Difference Control (Q-Learning)
+### [Week 4 — Temporal-Difference Control (Q-Learning)](week4_temporal_difference_control.md)
 **The "Greedy" approach to success.**
 We dive into the most famous algorithm in RL: **Q-Learning**. You'll learn the "Exploration vs. Exploitation" dilemma — how an agent decides between trying something new and sticking to what it knows works.
 
-### Week 5 — Value-Based Deep RL (DQN)
+### [Week 5 — Value-Based Deep RL (DQN)](week5_value_based_deep_reinforcement_learning.md)
 **Giving the agent a "Brain."**
 We combine RL with Deep Learning. You'll learn how **Deep Q-Networks (DQN)** allowed AI to beat human champions at Atari games by using neural networks to approximate complex values.
 
-### Week 6 — Policy Gradient Methods
+### [Week 6 — Policy Gradient Methods](week6_policy_gradient_method.md)
 **Learning the "Vibe," not the "Value."**
 Instead of calculating how good a state is, we teach the agent to directly learn the best action. This is the foundation for controlling robots and systems with complex, continuous movements.
 
-### Week 7 — Advanced Deep RL & Actor-Critic
+### [Week 7 — Advanced Deep RL & Actor-Critic](week7_advanced_deep_reinforcement_learning_and_actor_critic.md)
 **The Gold Standard of modern RL.**
 We combine the best of both worlds (Value + Policy) into the **Actor-Critic** framework. We will introduce **PPO** — the engine used to align modern models like ChatGPT to be more helpful and safe.
 
